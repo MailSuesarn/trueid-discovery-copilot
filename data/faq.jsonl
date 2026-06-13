@@ -1,0 +1,20 @@
+{"id": "f-001", "question_th": "วิธีสมัครและยกเลิกแพ็กเกจ TrueID ทำอย่างไร", "answer_th": "สมัครได้ในแอป TrueID > เมนูแพ็กเกจ และยกเลิกได้ก่อนรอบบิลถัดไปทางช่องเดียวกัน", "tags": ["package", "billing"]}
+{"id": "f-002", "question_th": "ดูพร้อมกันกี่จอในแต่ละแพ็ก", "answer_th": "FREE ดูได้ 1 จอ, TrueID+ และ TrueID Premium ดูพร้อมกัน 2 จอ", "tags": ["package", "device"]}
+{"id": "f-003", "question_th": "ดูพรีเมียร์ลีกใน TrueID ต้องใช้แพ็กไหน", "answer_th": "ต้องเป็นแพ็ก TrueID Premium ขึ้นไปจึงจะรับชมการถ่ายทอดสดพรีเมียร์ลีกได้ครบทุกแมตช์", "tags": ["sports", "package", "premier_league"]}
+{"id": "f-004", "question_th": "ใช้คะแนน TrueID แลกของรางวัลอย่างไร", "answer_th": "เข้าเมนูสิทธิพิเศษในแอป เลือกของรางวัล แล้วกดแลก คะแนนจะถูกหักทันที", "tags": ["privileges", "points"]}
+{"id": "f-005", "question_th": "วิธีดาวน์โหลดดูออฟไลน์", "answer_th": "แตะปุ่มดาวน์โหลดในหน้ารายละเอียดเรื่อง รองรับเฉพาะแพ็ก TrueID+ ขึ้นไป", "tags": ["app", "offline"]}
+{"id": "f-006", "question_th": "เปิดซับไตเติลภาษาไทยและภาษาอังกฤษอย่างไร", "answer_th": "ระหว่างเล่นกดไอคอน CC แล้วเลือกภาษาที่ต้องการ ภาษามีให้เลือกตามรายการ", "tags": ["subtitle", "app"]}
+{"id": "f-007", "question_th": "ระบบ Parental Control ตั้งค่าอย่างไร", "answer_th": "เข้าเมนูบัญชี > ปกครอง เพื่อกำหนดเรตเนื้อหา และตั้งรหัสล็อกได้", "tags": ["kids", "parental"]}
+{"id": "f-008", "question_th": "ช่องทางชำระเงินมีอะไรบ้าง", "answer_th": "รองรับบัตรเครดิต, บัตรเดบิต, TrueMoney Wallet, และหัก True Move H ต่อรอบบิล", "tags": ["billing", "payment"]}
+{"id": "f-009", "question_th": "ดูจากทีวีบ้านได้หรือไม่", "answer_th": "รองรับ Smart TV (Android TV, Samsung, LG), Apple TV, Chromecast และ AirPlay", "tags": ["device", "tv"]}
+{"id": "f-010", "question_th": "ทดลองใช้ฟรีมีกี่วัน", "answer_th": "ลูกค้าใหม่ทดลองใช้ TrueID+ ฟรี 7 วันโดยไม่ต้องตัดบัตรครั้งแรก", "tags": ["trial", "package"]}
+{"id": "f-011", "question_th": "ฟุตบอลแชมเปียนส์ลีกอยู่แพ็กไหน", "answer_th": "การถ่ายทอดสดแชมเปียนส์ลีกอยู่ในแพ็ก TrueID Premium", "tags": ["sports", "champions_league", "package"]}
+{"id": "f-012", "question_th": "ไทยลีก 1 ดูได้ในแพ็กอะไร", "answer_th": "ไทยลีก 1 ครบทุกแมตช์รับชมได้บนแพ็ก TrueID+ ขึ้นไป", "tags": ["sports", "thai_league", "package"]}
+{"id": "f-013", "question_th": "ดูแบบ 4K ต้องเป็นแพ็กไหน", "answer_th": "คุณภาพระดับ 4K HDR ใช้ได้กับ TrueID Premium บนอุปกรณ์ที่รองรับ", "tags": ["quality", "package"]}
+{"id": "f-014", "question_th": "นโยบายคืนเงินเป็นอย่างไร", "answer_th": "หากชำระแล้วไม่พอใจติดต่อ Call Center ภายใน 7 วันเพื่อพิจารณาคืนเงินตามเงื่อนไข", "tags": ["billing", "refund"]}
+{"id": "f-015", "question_th": "เปลี่ยนแพ็กจาก TrueID+ ไป Premium ทันทีได้หรือไม่", "answer_th": "ทำได้ทันที โดยจะคิดส่วนต่างของรอบบิลปัจจุบันให้อัตโนมัติ", "tags": ["package", "upgrade"]}
+{"id": "f-016", "question_th": "ดูในต่างประเทศได้หรือไม่", "answer_th": "เนื้อหาบางส่วนรับชมได้นอกประเทศไทย คอนเทนต์ลิขสิทธิ์เฉพาะอาจถูกจำกัด", "tags": ["geo", "travel"]}
+{"id": "f-017", "question_th": "ใช้บัญชีเดียวกันในครอบครัวได้กี่คน", "answer_th": "สูงสุด 5 โปรไฟล์ต่อบัญชี และดูพร้อมกันตามจำนวนจอที่แพ็กกำหนด", "tags": ["account", "family"]}
+{"id": "f-018", "question_th": "เกมและ esports ดูได้ไหม", "answer_th": "TrueID มีคอนเทนต์ esports และไฮไลท์เกม รวมถึงรายการสด eFootball เฉพาะแพ็ก Premium", "tags": ["esports", "package"]}
+{"id": "f-019", "question_th": "Casting ขึ้นทีวีทำอย่างไร", "answer_th": "แตะปุ่ม Cast ในแอปแล้วเลือกอุปกรณ์รับสัญญาณ Chromecast / AirPlay", "tags": ["device", "tv"]}
+{"id": "f-020", "question_th": "ติดต่อทีมงานช่องทางไหน", "answer_th": "Live chat ในแอป, Call Center 1242 หรืออีเมล support@trueid.net 24 ชั่วโมง", "tags": ["support", "contact"]}

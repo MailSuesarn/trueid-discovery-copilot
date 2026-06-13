@@ -1,0 +1,6 @@
+{"user_id": "u_001", "current_package": "TrueID+", "tier": "PLUS", "points": 120, "segment": "returning"}
+{"user_id": "u_002", "current_package": "FREE", "tier": "FREE", "points": 20, "segment": "trial"}
+{"user_id": "u_003", "current_package": "TrueID Premium", "tier": "PREMIUM", "points": 500, "segment": "loyal"}
+{"user_id": "u_004", "current_package": "TrueID+", "tier": "PLUS", "points": 80, "segment": "returning"}
+{"user_id": "u_005", "current_package": "FREE", "tier": "FREE", "points": 0, "segment": "new"}
+{"user_id": "u_006", "current_package": "TrueID Premium", "tier": "PREMIUM", "points": 750, "segment": "loyal"}

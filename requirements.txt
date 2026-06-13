@@ -2,7 +2,6 @@
 fastapi==0.115.6
 uvicorn[standard]==0.34.0
 pydantic==2.10.4
-pydantic-settings==2.7.1
 httpx==0.28.1
 
 # ---- LLM provider ----
@@ -14,9 +13,9 @@ numpy==2.2.1
 scikit-learn==1.6.1          # cosine / utilities for dense search
 
 # ---- Config / utils ----
-pyyaml==6.0.2
-python-dotenv==1.0.1
-tenacity==9.0.0              # retries/backoff in the LLM gateway
+pyyaml==6.0.2               # configs/app.yaml → typed Pydantic v2 settings models
+python-dotenv==1.0.1        # auto-load .env (OPENAI_API_KEY / LLM_MODE) for local runs
+tenacity==9.0.0             # retries/backoff in the LLM gateway
 
 # ---- Eval / reporting (used in the notebook) ----
 pandas==2.2.3

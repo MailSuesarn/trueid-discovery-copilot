@@ -1,0 +1,43 @@
+{
+  "tiers": [
+    "FREE",
+    "PLUS",
+    "PREMIUM"
+  ],
+  "packages": [
+    {
+      "name": "FREE",
+      "tier": "FREE",
+      "price_thb": 0,
+      "includes": [
+        "ads",
+        "limited_catalog"
+      ],
+      "live_sports": false,
+      "concurrent_devices": 1
+    },
+    {
+      "name": "TrueID+",
+      "tier": "PLUS",
+      "price_thb": 119,
+      "includes": [
+        "no_ads",
+        "full_catalog"
+      ],
+      "live_sports": false,
+      "concurrent_devices": 2
+    },
+    {
+      "name": "TrueID Premium",
+      "tier": "PREMIUM",
+      "price_thb": 349,
+      "includes": [
+        "no_ads",
+        "full_catalog",
+        "live_sports_premier_league"
+      ],
+      "live_sports": true,
+      "concurrent_devices": 2
+    }
+  ]
+}

@@ -13,6 +13,17 @@ from typing import Literal
 import yaml
 from pydantic import BaseModel
 
+# Load .env once, on first import of config, so OPENAI_API_KEY / LLM_MODE / etc. set in a
+# local .env file are available to every entrypoint (app, scripts, eval). Shell-exported
+# env vars still win (load_dotenv does NOT override existing os.environ). In Colab there is
+# no .env — the notebook sets os.environ directly — so this is a no-op there.
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv()
+except Exception:  # noqa: BLE001 — never let a missing/odd .env break the #1 rule
+    pass
+
 
 class AppCfg(BaseModel):
     name: str = "TrueID Discovery & Monetization Copilot"

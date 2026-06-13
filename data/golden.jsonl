@@ -1,0 +1,25 @@
+{"query": "คืนนี้มีบอลพรีเมียร์ลีกไหม ดูได้เลยหรือเปล่า", "user_id": "u_001", "expected_intent": "live_schedule", "relevant_ids": ["m-002", "f-003"], "expected_action": "upgrade", "language": "th"}
+{"query": "อยากดูซีรีส์เกาหลีแนวสืบสวน เบาๆ ก่อนนอน", "user_id": "u_001", "expected_intent": "find_content", "relevant_ids": ["c-014"], "expected_action": "play", "language": "th"}
+{"query": "แพ็กของฉันดู Liverpool vs Arsenal ได้ไหม", "user_id": "u_003", "expected_intent": "entitlement_check", "relevant_ids": ["m-002"], "expected_action": "play", "language": "th"}
+{"query": "มีสิทธิพิเศษร้านกาแฟใกล้ฉันไหม", "user_id": "u_002", "expected_intent": "find_privilege", "relevant_ids": ["p-007", "p-001", "p-005"], "expected_action": "redeem", "language": "th"}
+{"query": "recommend a package if I mainly watch live football", "user_id": "u_001", "expected_intent": "recommend_package", "relevant_ids": ["f-003"], "expected_action": "upgrade", "language": "en"}
+{"query": "การ์ตูนเด็กเล็กมีอะไรบ้าง", "user_id": "u_001", "expected_intent": "find_content", "relevant_ids": ["c-060", "c-061"], "expected_action": "play", "language": "th"}
+{"query": "แพ็กของฉันดู Liverpool vs Arsenal ได้ไหม", "user_id": "u_001", "expected_intent": "entitlement_check", "relevant_ids": ["m-002", "f-003"], "expected_action": "upgrade", "language": "th"}
+{"query": "พรุ่งนี้ Real Madrid เตะกับ Barcelona ดูช่องไหน", "user_id": "u_003", "expected_intent": "live_schedule", "relevant_ids": ["m-003"], "expected_action": "play", "language": "th"}
+{"query": "หนังผีไทยน่ากลัวๆ", "user_id": "u_001", "expected_intent": "find_content", "relevant_ids": ["c-003"], "expected_action": "play", "language": "th"}
+{"query": "แนะนำแพ็กสำหรับดูซีรีส์เกาหลีและซีรีส์ไทย", "user_id": "u_002", "expected_intent": "recommend_package", "relevant_ids": ["f-002", "f-010"], "expected_action": "upgrade", "language": "th"}
+{"query": "any deals for shopping at Tops or BigC", "user_id": "u_001", "expected_intent": "find_privilege", "relevant_ids": ["p-003", "p-004"], "expected_action": "redeem", "language": "en"}
+{"query": "BG ปทุม เจอ บุรีรัมย์ ดูที่ช่องอะไร", "user_id": "u_001", "expected_intent": "live_schedule", "relevant_ids": ["m-006"], "expected_action": "play", "language": "th"}
+{"query": "I want a K-drama detective series light before bed", "user_id": "u_001", "expected_intent": "find_content", "relevant_ids": ["c-014"], "expected_action": "play", "language": "en"}
+{"query": "ดู Champions League ได้ไหมกับแพ็กของฉัน", "user_id": "u_002", "expected_intent": "entitlement_check", "relevant_ids": ["m-005", "f-011"], "expected_action": "upgrade", "language": "th"}
+{"query": "แลกตั๋วหนังราคาพิเศษ", "user_id": "u_003", "expected_intent": "find_privilege", "relevant_ids": ["p-002"], "expected_action": "redeem", "language": "th"}
+{"query": "อนิเมะแอคชั่นมันส์ๆ", "user_id": "u_001", "expected_intent": "find_content", "relevant_ids": ["c-040", "c-041"], "expected_action": "play", "language": "th"}
+{"query": "I'm new to TrueID what's the cheapest paid plan", "user_id": "u_002", "expected_intent": "recommend_package", "relevant_ids": ["f-001", "f-010"], "expected_action": "upgrade", "language": "en"}
+{"query": "Premier League matches tonight", "user_id": "u_003", "expected_intent": "live_schedule", "relevant_ids": ["m-002"], "expected_action": "play", "language": "en"}
+{"query": "Can I watch Seoul Mystery with my package", "user_id": "u_001", "expected_intent": "entitlement_check", "relevant_ids": ["c-014"], "expected_action": "play", "language": "en"}
+{"query": "หนังครอบครัวสั้นๆ ดูกับลูก", "user_id": "u_001", "expected_intent": "find_content", "relevant_ids": ["c-001"], "expected_action": "play", "language": "th"}
+{"query": "ส่วนลดร้านกาแฟอเมซอน", "user_id": "u_002", "expected_intent": "find_privilege", "relevant_ids": ["p-007", "p-001"], "expected_action": "redeem", "language": "th"}
+{"query": "ครอบครัวมี 4 คนอยากดูพร้อมกัน แนะนำแพ็กไหน", "user_id": "u_002", "expected_intent": "recommend_package", "relevant_ids": ["f-002"], "expected_action": "upgrade", "language": "th"}
+{"query": "ซีรีส์ไทยรักโรแมนติก", "user_id": "u_001", "expected_intent": "find_content", "relevant_ids": ["c-004", "c-002"], "expected_action": "play", "language": "th"}
+{"query": "ฉันดูหนัง Lost Planet ได้ไหม", "user_id": "u_003", "expected_intent": "entitlement_check", "relevant_ids": ["c-082"], "expected_action": "play", "language": "th"}
+{"query": "Western crime thriller series like NYC detectives", "user_id": "u_004", "expected_intent": "find_content", "relevant_ids": ["c-081", "c-080"], "expected_action": "play", "language": "en"}
