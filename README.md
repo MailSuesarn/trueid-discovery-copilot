@@ -1,152 +1,196 @@
-# TrueID Discovery & Monetization Copilot
+<p align="center">
+  <img src="docs/hero.png" alt="TrueID Discovery & Monetization Copilot" width="100%">
+</p>
 
-> An **entitlement-aware** conversational copilot for TrueID. It helps a user find
-> something to watch — including **live sports** — tells them whether *their* package can
-> actually play it, surfaces relevant privileges, and ends with **one honest, governed
-> action** (`play` / `upgrade` / `redeem`). Built for the True Digital AI Engineer
-> assessment as a production-shaped, eval-driven system.
+<h1 align="center">TrueID Discovery & Monetization Copilot</h1>
 
-It complements True's existing care assistant **Mari** (which owns support) by owning the
-**discovery → monetization** moment — the part of the funnel that actually moves revenue.
+<p align="center">
+  <em>An <b>entitlement-aware</b> conversational copilot that finds content (incl. live sports),
+  checks whether <b>your</b> package can play it, surfaces relevant privileges,
+  and ends with <b>one honest, governed action</b>.</em>
+</p>
 
----
+<p align="center">
+  <code>play</code> · <code>upgrade</code> · <code>redeem</code> · <code>none</code> &nbsp;|&nbsp;
+  FastAPI · Hybrid RAG (BM25 + dense + RRF) · Pydantic structured output · eval-as-CI-gate
+</p>
 
-## The problem & the business case
-
-TrueID is a broad media-lifestyle platform: watch, listen, read, live TV/sports, games,
-privileges, commerce. That breadth creates **discovery friction** — users abandon search,
-miss content their package already includes, and never see the upgrade or privilege that
-fits them. Classic search + recommendation rails don't *converse*, don't reason about a
-user's **entitlement**, and don't close with an action.
-
-This copilot turns a natural-language request into a grounded answer **plus a governed
-next step**, on the conversion funnel itself.
-
-### Target KPIs (illustrative, the way they'd be tracked)
-- **Search/discovery abandonment** ↓ (fewer dead-end searches → sessions that resolve)
-- **Trial → paid conversion** ↑ (entitlement-aware upgrade prompts at the moment of intent)
-- **Privilege redemption** ↑ among prompted users (drives partner + retention value)
-- **Play-start rate** ↑ from conversational discovery vs static rails
-
-The upgrade prompt is a **governed next-best-action**: it only appears when a deterministic
-policy says the user is eligible, and the discount is capped *in code*. Monetization without
-dark patterns — and, because it's deterministic, it's **measurable to the exact action**.
+<p align="center">
+  🇹🇭 <a href="README.th.md"><b>อ่านสรุปฉบับภาษาไทย (สำหรับผู้ตรวจ)</b></a> &nbsp;·&nbsp;
+  📐 <a href="ARCHITECTURE.md">Architecture</a> &nbsp;·&nbsp;
+  📓 <a href="notebooks/exam.ipynb">Submission notebook</a>
+</p>
 
 ---
 
-## What it does (5 intents)
-1. **find_content** — "อยากดูซีรีส์เกาหลีแนวสืบสวน เบาๆ ก่อนนอน"
-2. **entitlement_check** — "แพ็กของฉันดู Liverpool vs Arsenal ได้ไหม"
-3. **live_schedule** — "คืนนี้มีบอลพรีเมียร์ลีกไหม ดูได้เลยหรือเปล่า" *(flagship — live sports is TrueID's real moat)*
-4. **find_privilege** — "มีสิทธิพิเศษร้านกาแฟใกล้ฉันไหม"
-5. **recommend_package** — "recommend a package if I mainly watch live football"
+## What & why
 
-Every reply is a strict JSON contract:
+TrueID is a broad media-lifestyle platform (watch, listen, live sports, games, privileges, commerce).
+That breadth creates **discovery friction**: users abandon search, don't know if their package can
+play something, and miss the upgrade or privilege that fits them. Classic search rails don't
+*converse*, don't reason about **entitlement**, and don't close with an action.
+
+This copilot sits on the **discovery → monetization** moment — complementing True's care assistant
+(Mari, which owns support). It turns a natural-language question into a grounded answer **plus one
+governed next step**.
+
+**Target KPIs:** trial→paid conversion ↑ · privilege redemption ↑ · search abandonment ↓ · play-start ↑.
+The upgrade is a *governed next-best-action* — offered **only when a deterministic policy says so**,
+discount capped **in code**. Monetization without dark patterns, and **measurable to the exact action**.
+
+## What it does — 5 intents, 1 JSON contract
+
+| Intent | Example | Typical action |
+|--------|---------|----------------|
+| `find_content` | "อยากดูซีรีส์เกาหลีแนวสืบสวน เบาๆ" | `play` |
+| `entitlement_check` | "แพ็กของฉันดู Liverpool vs Arsenal ได้ไหม" | `play` / `upgrade` |
+| `live_schedule` ⭐ | "คืนนี้มีบอลพรีเมียร์ลีกไหม" | `upgrade` / `play` |
+| `find_privilege` | "มีสิทธิพิเศษร้านกาแฟไหม" | `redeem` |
+| `recommend_package` | "recommend a package for live football" | `upgrade` |
+
+⭐ Live sports (Premier League) is TrueID's real moat vs global streamers.
+
+**Input** `POST /chat` → **Output** (Pydantic-validated):
 ```json
 {
-  "answer_th": "...",
-  "citations": ["catalog:c-014", "faq:f-003"],
-  "action": "upgrade",
-  "upsell": { "package": "TrueID Premium", "reason_th": "..." }
+  "answer_th": "แนะนำ ปริศนาแห่งโซล — ซีรีส์เกาหลีแนวสืบสวน ดูเพลินก่อนนอน กดดูได้เลย",
+  "citations": ["catalog:c-014"],
+  "action": "play",
+  "upsell": { "package": null, "reason_th": null }
 }
 ```
 
----
+## How it works
 
-## Architecture (short version)
-
-A **fixed, deterministic pipeline** — not a free-form agent loop, so it is predictable,
-testable, and safe to run unattended:
+A **fixed, deterministic pipeline** — not a free-form agent loop, so it's predictable, testable, and safe:
 
 ```
-/chat → request id + PII redaction → classify intent → hybrid retrieve (BM25 + dense + RRF)
-      → deterministic tools (entitlement / schedule / privilege-policy)
-      → LLM composes a grounded answer + structured action → Pydantic validation → response
+POST /chat
+  → request_id + PII redaction (Thai-ID regex) + rate limit
+  → 1) classify intent          (+ language)
+  → 2) hybrid retrieve          BM25 + dense + RRF   ◄── RAG: Retrieval
+  → 3) deterministic tools       entitlement / schedule / privilege
+  → 4) policy: decide action     governed action + upsell (code, NOT the LLM)
+  → 5) compose answer            LLM grounded in context  ◄── RAG: Augment + Generate
+  → 6) validate (Pydantic) → { answer_th, citations, action, upsell }  + structured log
 ```
 
-- **Grounded:** answers use only retrieved sources; every claim carries a citation id.
-- **Governed:** `action` and any offer come from the deterministic policy, not the LLM.
-- **Resilient:** degrades gracefully — `provider` LLM → `extractive` (no LLM) and
-  dense retrieval → BM25-only — so it runs **with or without an API key**.
+Only **step 5 calls the LLM**, and it has a no-LLM fallback — that's why the whole thing runs
+**with or without an API key**.
 
-Full design, including the OpenAI per-model-family parameter handling and the scalability
-path, is in **[ARCHITECTURE.md](ARCHITECTURE.md)**.
+### Where RAG lives (the core)
+- **Retrieve** (`app/retrieval/`) — hybrid over 222 namespaced docs (`catalog:c-014`, `faq:f-003`, …):
+  **BM25** (always-on, offline, Thai via char-trigrams) + **dense** (`text-embedding-3-large`, 1024-d,
+  cached to `data/index/embeddings.npz`) fused with **Reciprocal Rank Fusion**. No key/cache → BM25-only.
+- **Augment** (`app/agent/guardrails.py`) — retrieved chunks + tool facts go into `<context>` /
+  `<tool_results>` blocks, explicitly framed as *data, not instructions* (prompt-injection hardening).
+- **Generate** (`app/llm/`) — the LLM writes `answer_th` via **structured output** (OpenAI
+  `responses.parse(text_format=ChatResponse)` → `chat.completions.parse` fallback). Citations are
+  filtered to **ids that were actually retrieved** (no hallucinated sources).
 
----
+> **The key twist:** a **deterministic governance layer sits between retrieval and generation**.
+> `action` + `upsell` come from `app/tools/privilege.py` (code), not the LLM — making action
+> accuracy an exact-match metric, enforcing the discount ceiling, and leaving the LLM to do only
+> phrasing + citing.
+
+## Results (offline path — no key, no network, on CPU)
+
+| metric | value | threshold |
+|--------|-------|-----------|
+| Hit@3 | **0.84** | ≥ 0.80 ✅ |
+| MRR | 0.768 | — |
+| action accuracy | **1.00** | ≥ 0.90 ✅ |
+| groundedness | **1.00** | ≥ 0.90 ✅ |
+| latency p50 / p95 | ~1 ms | — |
+| cost / query | $0.00 | — |
+
+`python -m app.eval.run_eval --check` is the **CI quality gate** — any drop below threshold fails the build.
 
 ## Quickstart
 
-### A) Google Colab (how the assessment is graded)
-The submission notebook clones this repo, installs, ingests, runs the tests, runs live
-queries via FastAPI's in-process `TestClient`, and prints the eval metrics table. It runs
-**end-to-end on a fresh CPU runtime in under ~10 minutes**, with an OpenAI key *or with no
-key* (offline `extractive` mode). See **[NOTEBOOK_GUIDE.md](NOTEBOOK_GUIDE.md)**.
+**Google Colab (how it's graded)** — open [`notebooks/exam.ipynb`](notebooks/exam.ipynb) → *Runtime → Run all*.
+It clones, installs, ingests, runs pytest, fires 5 live queries, and prints the metrics table —
+**end-to-end on a fresh CPU runtime in <~10 min, with or without a key** (no key → offline mode).
 
-### B) Local
+**Local (cross-platform):**
 ```bash
-pip install -r requirements.txt    # editable install of the package
-cp .env.example .env               # put your OpenAI key in .env (optional; runs without it)
-make data && make ingest           # generate synthetic data + build the index
-make test                          # mock LLM, no network
-make eval                          # prints the metrics table
-make serve                         # API on http://localhost:8000  (POST /chat)
+pip install -r requirements.txt        # editable install of the package
+python scripts/generate_data.py        # seeded synthetic data
+python scripts/ingest.py               # build index (BM25 always; dense if a key is set)
+LLM_MODE=mock pytest -q                 # tests: mock LLM, no network
+python -m app.eval.run_eval --check     # metrics table + CI gate
+python scripts/demo.py                  # ▶ see real /chat output for all 5 intents
 ```
+`make data | ingest | test | eval | lint | serve` wrap these on systems with `make`.
 
-### C) Docker (production path — not used inside Colab)
+**API key:** put `OPENAI_API_KEY=...` in `.env` (gitignored, auto-loaded) → `demo.py` uses the real
+LLM; no key → deterministic offline mode. (Colab prompts for the key via `getpass`.)
+
+<details>
+<summary><b>Windows PowerShell (no <code>make</code>) — full steps</b></summary>
+
+> Use **Python 3.11**: `numpy==2.2.1` has no Windows wheels for 3.13/3.14 (source build fails).
+
+```powershell
+py -3.11 -m venv .venv                  # if `py -3.11` is missing: install via winget/uv first
+.\.venv\Scripts\Activate.ps1            # blocked? Set-ExecutionPolicy -Scope Process Bypass
+python -m pip install -r requirements.txt
+python scripts\generate_data.py
+python scripts\ingest.py
+$env:LLM_MODE='mock'; python -m pytest -q
+python -m app.eval.run_eval --check
+python -m ruff check src tests scripts
+Remove-Item Env:\LLM_MODE; python scripts\demo.py     # uses .env key if present
+```
+| `make` | PowerShell |
+|--------|------------|
+| `make data` | `python scripts\generate_data.py` |
+| `make ingest` | `python scripts\ingest.py` |
+| `make test` | `$env:LLM_MODE='mock'; python -m pytest -q` |
+| `make eval` | `$env:LLM_MODE='mock'; python -m app.eval.run_eval` |
+| `make serve` | `python -m uvicorn app.main:app --port 8000` |
+
+Not activating the venv? Prefix every `python` with `.\.venv\Scripts\python.exe`.
+</details>
+
+<details>
+<summary><b>Docker (production path — not run in Colab)</b></summary>
+
 ```bash
-docker compose up --build          # api + qdrant + redis
+docker compose up --build              # api + qdrant + redis
 ```
-> Colab has no Docker daemon, so Docker is **not** run there; it's the deploy path, and CI
-> proves the image builds. This keeps "production mindset" points without risking the
-> notebook run.
+CI proves the image builds. Colab has no Docker daemon, so it's never run there.
+</details>
 
-### Where the API key goes
-- **Local / Docker:** in `.env` as `OPENAI_API_KEY=...` (`.env` is gitignored).
-- **Colab:** entered at runtime via `getpass` (never committed). Leave it blank to run in
-  `extractive` mode.
+## Production posture
 
----
+- **LLMOps:** versioned prompts · structured JSON logs with `request_id` + token/cost counter ·
+  retries + timeout + fallback (provider→extractive, never a 500) · PII middleware · eval-as-CI-gate.
+- **Scalability:** stateless API · swappable vector store (in-memory → **Qdrant** behind one
+  `Retriever` interface) · **Redis** semantic cache · **model router** (simple intents →
+  `gpt-5.4-mini`, complex → `gpt-5.5`).
+- **Per-family LLM params:** reasoning models get `max_completion_tokens` + `reasoning_effort` +
+  `verbosity` (no `temperature`) — never a 400.
 
-## LLMOps (embedded in the code, not just described)
-- **Versioned prompts** as files in `prompts/`, selected by config.
-- **Structured JSON logging** with a `request_id` + per-request **token/cost counter**.
-- **Retries + timeout + fallback** in the LLM gateway (final failure → extractive, never a 500).
-- **Prompt-injection hardening:** retrieved text is treated as data, never instructions.
-- **PII redaction** middleware reusing the exam's Thai-ID regex.
-- **Eval as a CI quality gate:** a retrieval/action regression fails the build.
+## Built with Claude Code 🤖
 
-**Evaluation metrics:** Hit@3, MRR, action accuracy (exact match), groundedness (citation
-coverage), latency p50/p95, and cost/query — over a hand-built golden set.
+This repo was built by orchestrating **Claude Code** (Anthropic's CLI agent) under an explicit,
+committed contract:
 
-## Scalability
-Stateless API (horizontal scaling) · swappable vector store (in-memory → **Qdrant** behind
-one `Retriever` interface) · **Redis** semantic cache for hot queries · a **model router**
-(simple intents → `gpt-5.4-mini`, complex → `gpt-5.5`) · CI smoke-eval gate before deploy.
+- [`CLAUDE.md`](CLAUDE.md) — the operating rules the agent followed (the "#1 rule", conventions, DoD).
+- [`PLAN.md`](PLAN.md) — the phased build order, each phase gated by verify commands.
+- [`ARCHITECTURE.md`](ARCHITECTURE.md) — the design the code implements.
 
----
+The deliverable isn't just code — it's the **spec + plan + design that produced it**. 
 
-## Is this novel for TrueID?
-TrueID has classic search + recommendation and True has launched **Mari** for customer care.
-As of a public-surface check (App/Play Store changelogs, help center, recent news), a
-**conversational, entitlement-aware discovery + governed-monetization** copilot does not
-appear to be a shipped feature. Even if an internal pilot exists, the differentiators here —
-*entitlement-aware answers, a deterministic governed action, and an eval-driven pipeline* —
-stand on their own. (The rubric scores concept + execution, not patent-level novelty.)
+## Tech stack & layout
 
----
+Python 3.11 · FastAPI + Pydantic v2 · OpenAI SDK (`gpt-5.5` / `gpt-5.4-mini`, `text-embedding-3-large`)
+· `rank-bm25` + NumPy/scikit-learn · pytest + ruff · Docker · GitHub Actions. No agent framework, no DB.
 
-## Tech stack
-Python 3.10+ · FastAPI + Pydantic v2 · OpenAI Python SDK (`gpt-5.5` / `gpt-5.4-mini`,
-`text-embedding-3-large`) · `rank-bm25` + NumPy/scikit-learn (hybrid retrieval) · pytest +
-ruff · Docker/Compose · GitHub Actions. No agent framework, no database (synthetic data).
-
-## Repo layout
 ```
-configs/        app.yaml — model routing, retrieval params, feature flags
-prompts/        versioned prompt files
-data/           synthetic data spec + generated jsonl + golden set + index cache
-src/app/        api · core · retrieval · tools · agent · llm · eval
-tests/          pytest (mock LLM, no network)
-notebooks/      exam.ipynb (the submission runner + report)
-CLAUDE.md · PLAN.md · ARCHITECTURE.md · NOTEBOOK_GUIDE.md
+configs/   app.yaml (model routing, retrieval, thresholds)   prompts/  versioned prompts
+src/app/   api · core · retrieval · tools · agent · llm · eval
+data/      synthetic data + golden set + embedding cache      tests/    pytest (mock, no network)
+notebooks/ exam.ipynb (submission runner + report)            scripts/  generate_data · ingest · demo
 ```

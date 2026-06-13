@@ -18,6 +18,11 @@ env/
 .env.local
 *.key
 
+# Local tooling / editor — machine-specific, never commit
+.claude/
+.vscode/
+.idea/
+
 # Local artifacts
 *.log
 .DS_Store

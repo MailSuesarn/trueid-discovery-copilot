@@ -15,8 +15,8 @@ Global guardrail (repeat after every phase): everything must run on **CPU**, tes
 ## Phase 0 — Bootstrap & skeleton ✅ scaffold provided
 Goal: repo installs and config loads.
 - [ ] `pip install -r requirements.txt` succeeds (editable install of the package).
-- [ ] Implement `app/core/config.py`: load `configs/app.yaml` via PyYAML into a typed
-      settings object (pydantic-settings); env vars override (`LLM_MODE`, `OPENAI_MODEL`,
+- [ ] Implement `app/core/config.py`: load `configs/app.yaml` via PyYAML into typed
+      Pydantic v2 settings models; env vars override (`LLM_MODE`, `OPENAI_MODEL`,
       `OPENAI_API_KEY`, `APP_CONFIG`, …). Expose a cached `get_settings()`.
 - [ ] Implement `app/core/logging.py`: JSON structured logger with a `request_id` field.
 - [ ] `app/main.py`: FastAPI app factory + a `GET /health` returning `{"status":"ok"}`.

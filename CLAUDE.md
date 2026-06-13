@@ -25,9 +25,10 @@ clean CPU Colab in under ~10 minutes, deterministically?"*
 
 ## Tech stack (don't deviate without reason)
 Python 3.10+, FastAPI + Pydantic v2, OpenAI Python SDK (`openai>=2.41,<3`),
-`rank-bm25` + `numpy`/`scikit-learn` for hybrid retrieval, `pyyaml`/`pydantic-settings`
-for config, `tenacity` for retries, `pytest` + `ruff`. No agent framework — the
-orchestration is explicit Python (see below). No database — synthetic data only.
+`rank-bm25` + `numpy`/`scikit-learn` for hybrid retrieval, `pyyaml` for config
+(loaded into typed Pydantic v2 models) + `python-dotenv` to auto-load `.env`,
+`tenacity` for retries, `pytest` + `ruff`. No agent framework — the orchestration
+is explicit Python (see below). No database — synthetic data only.
 
 ## Architecture in one line
 `/chat` → PII redact + request id → classify intent → hybrid retrieve (BM25+dense+RRF)

@@ -21,7 +21,7 @@ eval:         ## Run the offline eval harness and print the metrics table
 	LLM_MODE=mock python -m app.eval.run_eval
 
 lint:         ## Lint + import sort check
-	ruff check src tests
+	ruff check src tests scripts
 
 clean:
 	rm -rf .pytest_cache .ruff_cache **/__pycache__ data/index

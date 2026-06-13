@@ -96,7 +96,7 @@ LLM — that is why action accuracy can be an exact-match metric.
 `app/llm/gateway.py` exposes one function the orchestrator calls, e.g.
 `compose(prompt_name, variables, schema) -> dict`. Mode from `configs/app.yaml`:
 - **`provider`** — call OpenAI. Auto-degrades to `extractive` if `OPENAI_API_KEY`
-  is missing (so a graderwith no key still gets a real, runnable answer).
+  is missing (so a grader with no key still gets a real, runnable answer).
 - **`extractive`** — NO LLM. Deterministically build `answer_th` from the top
   retrieved chunks + tool facts, and take `action` straight from the policy result.
   Guarantees end-to-end run with zero key/network.
