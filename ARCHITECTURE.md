@@ -159,3 +159,91 @@ the same box. We call the app **in-process via FastAPI `TestClient`** (zero port
 with an optional cell that spins real `uvicorn` on localhost to show HTTP. Docker is the
 *production* path (proven by CI building the image), explicitly **not** run in Colab.
 See `NOTEBOOK_GUIDE.md`.
+
+## 11. What this is — and where it goes next (fixed pipeline → host-agent tools via MCP)
+
+### 11.1 What it is
+This is a **single-turn, stateless, governed NL capability**, not a free-form chat agent.
+The LLM does two narrow jobs — classify intent and compose the prose — while the
+*decisions* (what to retrieve, which `action`, which offer) are made by code. That keeps
+the system predictable, measurable to the exact action, and provable on the part that
+matters most: entitlement and monetization. The conversational surface is the interface,
+not the architecture; the architecture is **retrieval + deterministic governance**.
+
+### 11.2 Assumption about True's stack
+True already operates a primary conversational assistant (**Mari**, for care). We assume a
+similar agent will own the main chat surface. Given that, the highest-leverage place for
+this system is **not** a second standalone chatbot competing for the same surface — it is a
+set of **capabilities the primary agent calls**. The chat UX belongs to the host agent; the
+determinism, entitlement awareness, and the governed next-best-action belong here.
+
+### 11.3 The pipeline already maps to tools
+The fixed pipeline decomposes cleanly into fine-grained, independently useful tools — the
+deterministic pieces already exist as pure functions (`app/tools/*`, `app/retrieval/*`):
+
+| Tool | Returns | Backed by |
+|------|---------|-----------|
+| `search_catalog(query, user_tier)` | ranked items + source ids | `retrieval/hybrid.py` |
+| `check_entitlement(user_id, content_id)` | `{can_play, min_tier_needed}` | `tools/entitlement.py` |
+| `get_live_schedule(team \| competition)` | matches (kickoff, channel, min_package) | `tools/schedule.py` |
+| `find_privileges(user_id, query)` | eligible deals (tier-gated) | `tools/privilege.py` |
+| `decide_next_action(user_id, context)` | **governed action + upsell** | `tools/privilege.py` |
+
+A host agent orchestrates the conversation and composes these tools; the **action is never
+the host LLM's to invent** — it must call `decide_next_action`, which enforces tier rules
+and the discount ceiling in code. The result is the right division of labour: **flexibility
+in the host agent, determinism and governance in the tools.**
+
+### 11.4 Why MCP
+**MCP (Model Context Protocol)** is the natural wire format for exposing these: it is
+vendor-neutral, so any host — an internal True agent, Mari's successor, or Claude — calls
+the same governed tools without bespoke glue. The `/chat` contract is already close to a
+tool signature (`{user_id, message} → {answer_th, citations, action, upsell}`); splitting it
+into the fine-grained tools above is a **packaging step on top of the existing code, not a
+rewrite**. The same `Retriever` and tool boundaries that allow a Qdrant/Redis swap (§9) are
+what make this tool extraction clean.
+
+So the two modes are complementary, not a fork:
+- **Standalone fixed pipeline** — the safe default; a self-contained discovery→monetization
+  service with a bounded, eval-gated cost/latency profile.
+- **MCP tools under a host agent** — the integration path when an agent already owns the
+  chat surface; the governance layer travels with the tools, so guarantees hold either way.
+
+### 11.5 Right-sizing the models — cost as a tunable, not a default
+Using a frontier LLM everywhere is the wrong reflex for a task this bounded. Most of the
+pipeline isn't a language-generation problem, so it shouldn't pay frontier-model prices:
+
+- **Intent classification is a 5-class problem over short text.** It doesn't need an LLM at
+  all — a small fine-tuned classifier is a better fit: a distilled multilingual encoder
+  (MiniLM / distil-XLM-R) or even TF-IDF + linear / fastText, trained on labelled queries.
+  Result: sub-millisecond, CPU-only, **$0 per call**, deterministic, and easy to monitor for
+  drift. (The keyword heuristic shipped here is the zero-training stand-in for exactly this
+  slot.) The LLM is then reserved for the one place generation genuinely adds value:
+  composing the grounded Thai answer.
+- **Compose with the smallest model that passes the gate.** The router already sends
+  deterministic-heavy intents to `gpt-5.4-mini`; the natural progression is to push the
+  floor lower (a small/distilled or self-hosted model) and let the eval thresholds decide
+  what's good enough — answer quality is measured, not assumed.
+- **Embeddings can be local.** A self-hosted multilingual embedder (e.g. `bge-m3`, `e5`)
+  removes per-query embedding cost entirely; the quality trade is observable through Hit@3 /
+  MRR before it ships.
+
+The point isn't "use less AI" — it's **matching the tool to the task**: a classifier for
+classification, ranking math for retrieval, code for governance, and an LLM only for
+generation. The eval-as-gate (§8) is what makes this safe to tune: cost becomes a dial you
+turn while the thresholds guard quality, instead of a guess baked into the model choice.
+
+### 11.6 Known limitations & the obvious next steps
+Stated plainly, with the upgrade path each one already has:
+- **Retrieval** uses BM25 char-trigrams for Thai (zero-dependency, Colab-safe). Production
+  swaps in a Thai word segmenter (`pythainlp`) and a **cross-encoder reranker** over the
+  fused top-k — both fit behind the `Retriever` interface.
+- **Eval** is a 25-row hand-built golden set over synthetic data: it measures *pipeline
+  correctness*, not real-world performance. Production grows this from labelled production
+  logs and adds reranker/answer-quality metrics.
+- **Entitlement** is a 3-tier model over `users.jsonl`. Real entitlement is a live
+  subscription service; `check_entitlement`/`decide_next_action` become thin clients over a
+  policy service (e.g. a rules engine / OPA) reading real-time state.
+- **Business KPIs** are hypotheses to validate by A/B test (governed-upsell arm vs control,
+  incremental conversion via holdout). Because `action` is deterministic, attribution stays
+  clean — you always know which policy produced which action.
