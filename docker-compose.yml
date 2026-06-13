@@ -1,0 +1,30 @@
+# Production-shaped local stack. Demonstrates the horizontal-scaling story:
+# stateless API + swappable vector store (Qdrant) + semantic cache (Redis).
+# The default app runs fine WITHOUT these (in-memory index); they are wired here
+# to show the scale path. See ARCHITECTURE.md §Scalability.
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - LLM_MODE=${LLM_MODE:-provider}
+      # Flip these on to use the external services instead of in-memory:
+      # - VECTOR_BACKEND=qdrant
+      # - QDRANT_URL=http://qdrant:6333
+      # - CACHE_BACKEND=redis
+      # - REDIS_URL=redis://redis:6379
+    depends_on:
+      - qdrant
+      - redis
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"

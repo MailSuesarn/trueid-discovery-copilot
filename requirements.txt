@@ -1,0 +1,29 @@
+# ---- Core API ----
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pydantic==2.10.4
+pydantic-settings==2.7.1
+httpx==0.28.1
+
+# ---- LLM provider ----
+openai>=2.41,<3
+
+# ---- Retrieval ----
+rank-bm25==0.2.2
+numpy==2.2.1
+scikit-learn==1.6.1          # cosine / utilities for dense search
+
+# ---- Config / utils ----
+pyyaml==6.0.2
+python-dotenv==1.0.1
+tenacity==9.0.0              # retries/backoff in the LLM gateway
+
+# ---- Eval / reporting (used in the notebook) ----
+pandas==2.2.3
+
+# ---- Dev / test ----
+pytest==8.3.4
+ruff==0.8.6
+
+# Editable install of this package so `from app.main import app` works anywhere
+-e .

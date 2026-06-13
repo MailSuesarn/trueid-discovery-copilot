@@ -1,0 +1,82 @@
+# =============================================================================
+# Central configuration. Loaded by app/core/config.py.
+# Env vars OVERRIDE these values (see .env.example). Keep code free of magic
+# numbers — everything tunable lives here.
+# =============================================================================
+
+app:
+  name: "TrueID Discovery & Monetization Copilot"
+  default_language: "th"          # answers default to Thai; mirror user language when detected
+
+llm:
+  # mode: provider | extractive | mock
+  #   provider   -> call OpenAI (requires OPENAI_API_KEY)
+  #   extractive -> NO LLM; compose a deterministic answer from retrieved chunks
+  #                 (guarantees the notebook runs end-to-end even with NO key)
+  #   mock       -> canned deterministic responses (used by the test suite)
+  # The gateway AUTO-DEGRADES provider -> extractive if no key is present.
+  mode: "provider"
+
+  # --- Model routing (verified against OpenAI lineup, June 2026) ---
+  # gpt-5.5 is a REASONING model: it rejects `temperature`/`top_p` and uses
+  # `max_completion_tokens` (chat) / `max_output_tokens` (responses). The gateway
+  # sets params per-family; do not add temperature here for gpt-5.x models.
+  model: "gpt-5.5"               # flagship; swap to "gpt-5.4" to cut cost ~2x
+  model_cheap: "gpt-5.4-mini"    # used by the model router for simple intents
+  # Optional: pin a dated snapshot for reproducibility, e.g. "gpt-5.5-2026-04-23"
+
+  reasoning_effort: "low"        # none | low | medium | high | xhigh  (low = fast+cheap, good for grounded answers)
+  verbosity: "low"               # low | medium | high  (low = concise Thai answers)
+  max_output_tokens: 1024
+  request_timeout_s: 30
+  max_retries: 2                 # tenacity exponential backoff in the gateway
+
+  # Model router: route "simple" intents to the cheap model to control cost.
+  router:
+    enabled: true
+    cheap_intents: ["live_schedule", "entitlement_check"]   # deterministic-heavy -> cheap model is plenty
+
+embeddings:
+  model: "text-embedding-3-large"   # best multilingual/Thai retrieval (MIRACL 54.9%)
+  dimensions: 1024                  # Matryoshka truncation: strong quality, smaller vectors
+  cache_path: "data/index/embeddings.npz"   # committed -> Colab ingest is offline + instant
+
+retrieval:
+  top_k: 5                       # chunks fed to the composer
+  candidate_k: 20                # candidates each retriever returns before fusion
+  # Hybrid = BM25 (lexical, always-on offline floor) + dense (semantic).
+  # Fused with Reciprocal Rank Fusion. If embeddings/key are unavailable the
+  # system degrades to BM25-only (still returns good results on this catalog).
+  hybrid:
+    use_bm25: true
+    use_dense: true
+    rrf_k: 60                    # RRF constant
+    bm25_weight: 1.0
+    dense_weight: 1.0
+
+guardrails:
+  # Retrieved text is treated as DATA, never as instructions (prompt-injection
+  # hardening). PII is redacted on the way in (reuses the exam Q2.1 regex).
+  pii_redaction: true
+  max_input_chars: 2000
+  rate_limit_per_min: 60         # naive in-memory limiter; Redis path in compose
+
+monetization:
+  # Governed next-best-action. The upsell is ONLY offered when policy allows;
+  # this makes "action accuracy" a deterministic, exact-match eval target.
+  enabled: true
+  max_discount_pct: 20           # hard ceiling enforced in code, not by the LLM
+  eligible_actions: ["play", "upgrade", "redeem", "none"]
+
+eval:
+  golden_path: "data/golden.jsonl"
+  thresholds:                    # CI smoke-eval gate (run_eval --check) fails below these
+    hit_at_3: 0.80
+    action_accuracy: 0.90
+    groundedness: 0.90
+
+observability:
+  # Structured JSON logs with a request id + per-request token/cost counter.
+  log_level: "INFO"
+  log_format: "json"
+  cost_accounting: true

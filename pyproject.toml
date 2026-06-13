@@ -1,0 +1,26 @@
+[project]
+name = "trueid-discovery-copilot"
+version = "0.1.0"
+description = "Entitlement-aware Discovery & Monetization Copilot for TrueID (AI Engineer assessment)"
+requires-python = ">=3.10"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]  # line length handled by formatter; don't fail CI on long lines
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+# Tests must never hit the network. conftest.py forces LLM_MODE=mock before importing the app.

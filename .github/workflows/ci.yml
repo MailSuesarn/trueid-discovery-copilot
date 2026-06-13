@@ -1,0 +1,29 @@
+# CI as a quality gate: lint -> tests (mock LLM, no network) -> smoke eval ->
+# docker build. The smoke-eval step is the "LLMOps quality gate" — a regression
+# in retrieval/action accuracy fails the build before anything ships.
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: pip install -r requirements.txt
+      - name: Lint
+        run: ruff check src tests
+      - name: Generate data + ingest
+        run: python scripts/generate_data.py && python scripts/ingest.py
+      - name: Tests (mock LLM, no network)
+        run: LLM_MODE=mock pytest
+      - name: Smoke eval (quality gate)
+        run: LLM_MODE=mock python -m app.eval.run_eval --check
+      - name: Docker build
+        run: docker build -t trueid-discovery-copilot .
