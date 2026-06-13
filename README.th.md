@@ -236,7 +236,7 @@ python scripts\demo.py          # ยิง 6 คำถาม เห็น JSON 
 
 ---
 
-## 9. สรุป key ของโปรเจค (จำ 5 ข้อนี้พอ)
+## 9. สรุป key ของโปรเจค 
 
 1. **Entitlement-aware** — ทุกคำตอบรู้ว่าแพ็กผู้ใช้เล่นได้จริงไหม (FREE<PLUS<PREMIUM)
 2. **Governed action** — ปิดด้วย 1 action (`play/upgrade/redeem/none`) ที่ **โค้ดนโยบายกำหนด ไม่ใช่ LLM** → วัดผลแม่น + ไม่เป็น dark pattern
