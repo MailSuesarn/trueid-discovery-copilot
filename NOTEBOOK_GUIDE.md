@@ -35,17 +35,20 @@ h_flipped_image = image[:, ::-1]       # fill 2  (reverse the column axis)
 ```
 
 ### 1.3 Count distinct objects (bonus)
-`shapes.jpg` is a JPEG thumbnail with noise → use Otsu + **filter tiny contours** so you
-don't over-count.
+`shapes.jpg` is **bright shapes on a BLACK background** (a noisy JPEG thumbnail). Two keys:
+use **`THRESH_BINARY`** (NOT `_INV`) so the bright shapes are the foreground — inverting
+would make the black background the foreground and `RETR_EXTERNAL` would return one big
+frame contour (count = 1) — and **filter tiny contours** so JPEG noise doesn't over-count.
+The real image has **10** shapes (4 + 2 + 4), so the expected count is 10.
 ```python
 image = cv2.imread("shapes.jpg")                                            # fill 1
 gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)                        # fill 2
 _, thresh = cv2.threshold(gray_image, 0, 255,
-                          cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)          # fill 3
+                          cv2.THRESH_BINARY + cv2.THRESH_OTSU)             # fill 3 (NOT _INV)
 contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL,
                                cv2.CHAIN_APPROX_SIMPLE)                     # fill 4
 contours = [c for c in contours if cv2.contourArea(c) > 100]  # drop JPEG-noise specks
-# keep the template's downstream lines (object_count = len(contours); drawContours; show)
+# downstream: object_count = len(contours)  -> 10 ; draw on an RGB copy (cv2 is BGR) then show
 ```
 
 ### 2.1 Redact Thai national ID  → reused as production PII middleware in the repo
